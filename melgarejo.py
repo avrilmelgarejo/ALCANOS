@@ -2,13 +2,14 @@ import streamlit as st
 from sympy import symbols, Eq, solve
 
 # Función para balancear la ecuación de combustión
-def balance_combusion(compuesto, tipo):
+def balance_combustion(compuesto, tipo):
     # Variables simbólicas para la reacción balanceada
     C, H, O = symbols('C H O')
     
+    # Balance de acuerdo al tipo de compuesto
     if tipo == "alcano":
         # Fórmula general para un alcano: CnH2n+2
-        n = int(compuesto[0])  # número de átomos de carbono
+        n = int(compuesto[1])  # Número de átomos de carbono
         # Reacción: CnH2n+2 + O2 -> CO2 + H2O
         # Balance de átomos de carbono
         c_eq = Eq(n, C)
@@ -19,7 +20,7 @@ def balance_combusion(compuesto, tipo):
         
     elif tipo == "alqueno":
         # Fórmula general para un alqueno: CnH2n
-        n = int(compuesto[0])  # número de átomos de carbono
+        n = int(compuesto[1])  # Número de átomos de carbono
         # Reacción: CnH2n + O2 -> CO2 + H2O
         # Balance de átomos de carbono
         c_eq = Eq(n, C)
@@ -30,7 +31,7 @@ def balance_combusion(compuesto, tipo):
         
     elif tipo == "alquino":
         # Fórmula general para un alquino: CnH2n-2
-        n = int(compuesto[0])  # número de átomos de carbono
+        n = int(compuesto[1])  # Número de átomos de carbono
         # Reacción: CnH2n-2 + O2 -> CO2 + H2O
         # Balance de átomos de carbono
         c_eq = Eq(n, C)
@@ -43,21 +44,30 @@ def balance_combusion(compuesto, tipo):
     soluciones = solve((c_eq, h_eq, o_eq), (C, H, O))
     return soluciones
 
-# Interfaz de Streamlit
+# Interfaz de usuario en Streamlit
 def main():
-    st.title('Balanceador de Combustión')
-    st.write("Este es un balanceador de reacciones de combustión para alcanos, alquenos y alquinos.")
-    
-    # Selección de tipo de compuesto
+    st.title('Balanceador de Reacciones de Combustión')
+    st.write("""
+    Este es un balanceador de reacciones de combustión para **alcanos**, **alquenos** y **alquinos**.
+    Introduce la fórmula del compuesto para balancear su reacción de combustión.
+    """)
+
+    # Opciones de tipos de compuestos
     tipo = st.selectbox("Selecciona el tipo de compuesto:", ["alcano", "alqueno", "alquino"])
     
-    # Ingreso de fórmula
-    compuesto = st.text_input(f"Ingrese la fórmula del {tipo} (Ej. CnH2n+2):", "C2H6")  # ejemplo de alcano
+    # Ingreso de la fórmula del compuesto
+    compuesto = st.text_input(f"Ingrese la fórmula del {tipo} (Ej. C2H6 para alcano, C2H4 para alqueno):", "C2H6")
 
-    # Realizar el balance
-    if st.button('Balancear'):
-        soluciones = balance_combusion(compuesto, tipo)
-        st.write(f"La reacción balanceada es: {soluciones[C]}C + {soluciones[H]}H2 + {soluciones[O]}O2 -> {soluciones[C]}CO2 + {soluciones[H]}H2O")
+    if compuesto:
+        try:
+            # Realizar el balance
+            soluciones = balance_combustion(compuesto, tipo)
+            
+            # Mostrar los resultados
+            st.subheader("Reacción balanceada:")
+            st.write(f"{soluciones[0]} C + {soluciones[1]} H2 + {soluciones[2]} O2 → {soluciones[0]} CO2 + {soluciones[1]} H2O")
+        except Exception as e:
+            st.error(f"Hubo un error al balancear la fórmula. Verifica el formato de la fórmula y prueba de nuevo. Error: {str(e)}")
 
 if __name__ == "__main__":
     main()
